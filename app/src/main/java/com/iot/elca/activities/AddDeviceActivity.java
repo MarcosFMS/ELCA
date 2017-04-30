@@ -1,4 +1,4 @@
-package com.iot.elca.Activities;
+package com.iot.elca.activities;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -28,8 +28,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.marcos.elca.R;
-import com.iot.elca.DAO.ElcaDbHelper;
-import com.iot.elca.DAO.MainDeviceDAO;
+import com.iot.elca.dao.ElcaDbHelper;
+import com.iot.elca.dao.MainDeviceDAO;
 import com.iot.elca.MainActivity;
 import com.iot.elca.model.MainDevice;
 

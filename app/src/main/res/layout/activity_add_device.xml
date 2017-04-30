@@ -5,7 +5,7 @@
     android:id="@+id/activity_add_device"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.iot.elca.Activities.AddDeviceActivity">
+    tools:context="com.iot.elca.activities.AddDeviceActivity">
 
     <EditText
         android:visibility="invisible"

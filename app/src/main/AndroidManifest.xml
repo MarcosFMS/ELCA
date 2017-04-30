@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.iot.elca.Activities.AddDeviceActivity"></activity>
+        <activity android:name="com.iot.elca.activities.AddDeviceActivity"></activity>
     </application>
 
 </manifest>

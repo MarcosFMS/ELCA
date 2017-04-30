@@ -1,17 +1,12 @@
-package com.iot.elca.DAO;
+package com.iot.elca.dao;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 
 import com.iot.elca.model.MainDevice;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by Marcos on 26/03/2017.

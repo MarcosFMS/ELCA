@@ -1,4 +1,4 @@
-package com.iot.elca.DAO;
+package com.iot.elca.dao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
