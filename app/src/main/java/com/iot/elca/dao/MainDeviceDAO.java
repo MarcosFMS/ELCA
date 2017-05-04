@@ -18,7 +18,7 @@ public class MainDeviceDAO {
 
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + "(" +
-                    "ID INT PRIMARY KEY NOT NULL," +
+                    "ID VARCHAR(20) PRIMARY KEY NOT NULL," +
                     "SSID VARCHAR(50)," +
                     "PASSWORD VARCHAR(50)," +
                     "IS_ON BIT NOT NULL," +

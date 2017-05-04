@@ -5,12 +5,11 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.example.marcos.elca"
-        minSdkVersion 21
+        minSdkVersion 22
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -18,6 +17,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude "META-INF/MSFTSIG.SF"
+        exclude "META-INF/MSFTSIG.RSA"
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'thirdpartynotice.txt'
+    }
+
 }
 
 dependencies {
@@ -35,4 +45,9 @@ dependencies {
     compile 'com.microsoft.azure.android:azure-storage-android:1.0.0@aar'
     compile files('libs/jackson-annotations-2.1.2.jar')
     compile files('libs/jackson-5.0.0-jar-with-dependencies.jar')
+}
+
+dependencies {
+    // Remote binary dependency
+    compile 'com.microsoft.azure.sdk.iot:iot-device-client:1.1.25'
 }

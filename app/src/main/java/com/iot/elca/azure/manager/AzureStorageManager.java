@@ -18,7 +18,7 @@ import java.security.InvalidKeyException;
  * Created by Marcos on 29/04/2017.
  */
 
-public class AzureStorageManager extends AsyncTask<Object, Object, Void> {
+public class AzureStorageManager{
 
     private static AzureStorageManager storageManager;
 
@@ -41,18 +41,6 @@ public class AzureStorageManager extends AsyncTask<Object, Object, Void> {
      * @throws URISyntaxException
      * @throws InvalidKeyException
      */
-
-
-
-    @Override
-    protected Void doInBackground(Object... strings) {
-        try {
-            getDevicePlugData((String) strings[0]);
-        } catch (StorageException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public void getDevicePlugData(String deviceId)  throws StorageException {
         try
