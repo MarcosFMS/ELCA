@@ -13,6 +13,7 @@ import com.microsoft.azure.storage.table.TableQuery;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.Iterator;
 
 /**
  * Created by Marcos on 29/04/2017.
@@ -42,9 +43,7 @@ public class AzureStorageManager{
      * @throws InvalidKeyException
      */
 
-    public void getDevicePlugData(String deviceId)  throws StorageException {
-        try
-        {
+    public Iterable<DevicePlugDataEntity> getDevicePlugData(String deviceId) throws StorageException, URISyntaxException, InvalidKeyException {
             // Define constants for filters.
 
             // Retrieve storage account from connection-string.
@@ -60,7 +59,7 @@ public class AzureStorageManager{
             // Create a filter condition where the partition key is "Smith".
 
     	    String partitionFilter = TableQuery.generateFilterCondition(
-    	        PARTITION_KEY,
+    	            "PartitionKey",
     	        TableQuery.QueryComparisons.EQUAL,
     	        deviceId);
 
@@ -74,17 +73,12 @@ public class AzureStorageManager{
 
             TableQuery<DevicePlugDataEntity> partitionQuery =
                     TableQuery.from(DevicePlugDataEntity.class).where(partitionFilter);
-            // Loop through the results, displaying information about the entity.
-            for (DevicePlugDataEntity entity : cloudTable.execute(partitionQuery)) {
+            Iterable<DevicePlugDataEntity> dataList = cloudTable.execute(partitionQuery);
+            for (DevicePlugDataEntity entity : dataList) {
                 Log.d("azure-storage",entity.getPartitionKey() +
                         " " + entity.getRowKey() +
                         " " + entity.getMessage());
             }
-        }
-        catch (Exception e)
-        {
-            // Output the stack trace.
-            e.printStackTrace();
-        }
+            return dataList;
     }
 }

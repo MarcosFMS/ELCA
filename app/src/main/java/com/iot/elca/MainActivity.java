@@ -21,8 +21,12 @@ import com.iot.elca.azure.manager.AzureStorageManager;
 import com.iot.elca.dao.ElcaDbHelper;
 import com.iot.elca.dao.MainDeviceDAO;
 import com.iot.elca.model.MainDevice;
+import com.iot.elca.services.DevicePlugService;
 import com.iot.elca.view.TurnDeviceImageButton;
+import com.microsoft.azure.storage.StorageException;
 
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,7 +43,20 @@ public class MainActivity extends AppCompatActivity {
         AzureStorageManager manager = AzureStorageManager.getInstance();
         dbHelper = ElcaDbHelper.getInstance(getApplicationContext());
         loadDeviceList();
-        sendMessageToDevice();
+        //sendMessageToDevice();
+        /*
+        try {
+            AzureStorageManager.getInstance().getDevicePlugData("elca-main-device");
+        } catch (StorageException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }*/
+        Intent intent = new Intent(this, DevicePlugService.class);
+        intent.putExtra("deviceId", "elca_main_device");
+        startService(intent);
     }
 
     private void sendMessageToDevice() {

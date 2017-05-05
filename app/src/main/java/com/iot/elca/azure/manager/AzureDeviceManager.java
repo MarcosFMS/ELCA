@@ -44,45 +44,44 @@ public class AzureDeviceManager {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                NetworkResponse response = error.networkResponse;
-                if (error instanceof ServerError && response != null) {
-                    Log.d("error", "server error "+response.data+"!");
-                }
+                //Log.d("Error", error.getMessage());
                 onPostResponse(error.getMessage(), c, false);
             }
         }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                //params.put("Content-Type", "application/xml");
+                params.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 params.put("Authorization", "SharedAccessSignature sr=elca-iot.azure-devices.net&sig=Bi7Tk1nGxGeo%2BZv%2FSzlqnyRfgIOn%2BHGeCJBOPuaracI%3D&se=1525372587&skn=iothubowner");
                 params.put("Cache-Control", "no-cache");
                 return params;
             }
-            /*
-            @Override
-            public Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("api-version","2016-02-03");
-                return params;
-            }*/
+
             @Override
             public String getBodyContentType() {
-                return "application/text; charset=UTF-8";
+                return "application/x-www-form-urlencoded; charset=UTF-8";
             }
+
             @Override
-            public byte[] getBody(){
-                return "On".getBytes();
+            public byte[] getBody() {
+                try {
+                    return "On".getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return "".getBytes();
+                }
+
             }
+
         };
+
         try {
-            Log.d("request", String.valueOf(stringRequest.getMethod()==Request.Method.POST));
+            Log.d("request", stringRequest.getBody().toString());
         } catch (Exception authFailureError) {
             authFailureError.printStackTrace();
         }
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
-
 
     }
 
