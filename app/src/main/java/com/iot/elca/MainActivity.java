@@ -18,15 +18,13 @@ import com.example.marcos.elca.R;
 import com.iot.elca.activities.AddDeviceActivity;
 import com.iot.elca.azure.manager.AzureDeviceManager;
 import com.iot.elca.azure.manager.AzureStorageManager;
+import com.iot.elca.azure.model.DevicePlugDataEntity;
 import com.iot.elca.dao.ElcaDbHelper;
-import com.iot.elca.dao.MainDeviceDAO;
-import com.iot.elca.model.MainDevice;
+import com.iot.elca.dao.PlugDeviceDAO;
+import com.iot.elca.model.PlugDevice;
 import com.iot.elca.services.DevicePlugService;
 import com.iot.elca.view.TurnDeviceImageButton;
-import com.microsoft.azure.storage.StorageException;
 
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,23 +42,13 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = ElcaDbHelper.getInstance(getApplicationContext());
         loadDeviceList();
         //sendMessageToDevice();
-        /*
-        try {
-            AzureStorageManager.getInstance().getDevicePlugData("elca-main-device");
-        } catch (StorageException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }*/
         Intent intent = new Intent(this, DevicePlugService.class);
-        intent.putExtra("deviceId", "elca_main_device");
+        //intent.putExtra("deviceId", "elca_main_device");
         startService(intent);
     }
 
-    private void sendMessageToDevice() {
-        AzureDeviceManager.sendMessage("elca-main-device", getApplicationContext());
+    private void sendMessageToDevice(String idDevice, String state) {
+        AzureDeviceManager.sendEvent(idDevice, state);
     }
 
 
@@ -77,14 +65,14 @@ public class MainActivity extends AppCompatActivity {
     private void loadDeviceList(){
 
         //Load the list of devices
-        List<MainDevice> devices = MainDeviceDAO.selectAllDevices(dbHelper);
+        List<PlugDevice> devices = PlugDeviceDAO.selectAllDevices(dbHelper);
         /*List<Device> devices = new LinkedList<>();
         devices.add(new Device("Cafeteira", 1, null, false));
         devices.add(new Device("Geladeira", 2, null, false));
         devices.add(new Device("Televisão", 3, null, false));
         devices.add(new Device("Torradeira", 4, null, false));*/
         TableLayout tl = (TableLayout) findViewById(R.id.table_devices);
-        for (MainDevice d : devices) {
+        for (PlugDevice d : devices) {
 
             //Create device name column
             TableRow tr = new TableRow(getApplicationContext());
@@ -106,7 +94,11 @@ public class MainActivity extends AppCompatActivity {
 
             //create the button
             final TurnDeviceImageButton imgBtnTurnDevice = new TurnDeviceImageButton(getApplicationContext(), d);
-            imgBtnTurnDevice.setImageResource(R.drawable.turn_off);
+            if(d.getState().equals(DevicePlugDataEntity.ON)){
+                imgBtnTurnDevice.setImageResource(R.drawable.turn_on);
+            }else {
+                imgBtnTurnDevice.setImageResource(R.drawable.turn_off);
+            }
             imgBtnTurnDevice.setDevice(d);
             int size = (int) this.getResources().getDimension(R.dimen.dimen_turn_button_in_dp);
             imgBtnTurnDevice.setLayoutParams(new TableRow.LayoutParams(size, size));
@@ -132,28 +124,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void turnDevice() {
-        MainDevice device = imgBtnTurnDeviceAux.getDevice();
-        final List<Pair<String, String>> parameters = new LinkedList<>();
-        parameters.add(new Pair<>("ON", String.valueOf(device.isOn())));
+        PlugDevice device = imgBtnTurnDeviceAux.getDevice();
         //update button
-        if (device.isOn()) {
-            imgBtnTurnDeviceAux.setImageResource(R.drawable.turn_off);
-            device.setOn(false);
-        } else {
+        if (device.getState().equals(DevicePlugDataEntity.OFF)) {
             imgBtnTurnDeviceAux.setImageResource(R.drawable.turn_on);
-            device.setOn(true);
+            device.setState(DevicePlugDataEntity.ON);
+        } else {
+            imgBtnTurnDeviceAux.setImageResource(R.drawable.turn_off);
+            device.setState(DevicePlugDataEntity.OFF);
         }
 
-        Log.d("isOn", String.valueOf(device.isOn()));
-        new AsyncTask<TurnDeviceImageButton, Void, Void>() {
-            @Override
-            protected Void doInBackground(TurnDeviceImageButton... params) {
-                Log.d("onBackground", "started");
-
-                Log.d("onBackground", "finish");
-                return null;
-            }
-        }.execute();
+        Log.d("State", String.valueOf(device.getState()));
+        sendMessageToDevice(device.getId(), device.getState());
     }
 
 }

@@ -7,7 +7,7 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 
-import com.iot.elca.model.MainDevice;
+import com.iot.elca.model.PlugDevice;
 
 /**
  * Created by Marcos on 02/04/2017.
@@ -16,9 +16,9 @@ import com.iot.elca.model.MainDevice;
 @SuppressLint("AppCompatCustomView")
 public class TurnDeviceImageButton extends ImageButton {
 
-    private MainDevice device;
+    private PlugDevice device;
 
-    public TurnDeviceImageButton(Context context, MainDevice device) {
+    public TurnDeviceImageButton(Context context, PlugDevice device) {
         super(context);
         this.device = device;
     }
@@ -38,11 +38,11 @@ public class TurnDeviceImageButton extends ImageButton {
 
 
 
-    public MainDevice getDevice() {
+    public PlugDevice getDevice() {
         return device;
     }
 
-    public void setDevice(MainDevice device) {
+    public void setDevice(PlugDevice device) {
         this.device = device;
     }
 

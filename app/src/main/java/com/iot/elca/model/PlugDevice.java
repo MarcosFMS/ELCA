@@ -4,29 +4,29 @@ package com.iot.elca.model;
  * Created by Marcos on 21/03/2017.
  */
 
-public class MainDevice {
+public class PlugDevice {
 
     private String id;
     private String id_device;
-    private boolean on;
+    private String state;
     private String ip;
     private String ssid;
     private String password;
 
-    public MainDevice(String id, boolean on) {
+    public PlugDevice(String id, String state) {
         this.id_device = id;
-        this.on = on;
+        this.state = state;
     }
 
-    public MainDevice(String id, boolean on, String ssid, String password, String ip) {
+    public PlugDevice(String id, String state, String ssid, String password, String ip) {
         this.id_device = id;
-        this.on = on;
+        this.state = state;
         this.ssid = ssid;
         this.password = password;
         this.ip = ip;
     }
 
-    public MainDevice() {
+    public PlugDevice() {
     }
 
     public String getId() {
@@ -37,12 +37,12 @@ public class MainDevice {
         this.id_device = id;
     }
 
-    public boolean isOn() {
-        return on;
+    public String getState() {
+        return state;
     }
 
-    public void setOn(boolean on) {
-        this.on = on;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getSsid() {

@@ -74,11 +74,12 @@ public class AzureStorageManager{
             TableQuery<DevicePlugDataEntity> partitionQuery =
                     TableQuery.from(DevicePlugDataEntity.class).where(partitionFilter);
             Iterable<DevicePlugDataEntity> dataList = cloudTable.execute(partitionQuery);
+            /*
             for (DevicePlugDataEntity entity : dataList) {
                 Log.d("azure-storage",entity.getPartitionKey() +
                         " " + entity.getRowKey() +
-                        " " + entity.getMessage());
-            }
+                        " " + entity.getState());
+            }*/
             return dataList;
     }
 }

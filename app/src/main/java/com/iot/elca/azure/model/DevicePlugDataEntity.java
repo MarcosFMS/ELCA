@@ -8,9 +8,8 @@ import com.microsoft.azure.storage.table.TableServiceEntity;
 
 public class DevicePlugDataEntity extends TableServiceEntity {
 
-    public String IsOn;
-    public String DeviceId;
-    public String Message;
+    private String state;
+    public static String ON = "on", OFF = "off";
 
     // Note: An entity's partition and row key uniquely identify the entity in the table.
     // Entities with the same partition key can be queried faster than those with different partition keys.
@@ -21,27 +20,11 @@ public class DevicePlugDataEntity extends TableServiceEntity {
 
     public DevicePlugDataEntity() { }
 
-    public String getIsOn() {
-        return IsOn;
+    public String getState() {
+        return state;
     }
 
-    public void setIsOn(String isOn) {
-        IsOn = isOn;
-    }
-
-    public String getDeviceId() {
-        return DeviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        DeviceId = deviceId;
-    }
-
-    public String getMessage() {
-        return Message;
-    }
-
-    public void setMessage(String message) {
-        this.Message = message;
+    public void setState(String state) {
+        this.state = state;
     }
 }

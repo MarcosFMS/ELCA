@@ -1,99 +1,58 @@
 package com.iot.elca.azure.manager;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
+import android.util.Xml;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.ServerError;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.iot.elca.azure.model.DeviceStatus;
+import com.microsoft.azure.sdk.iot.device.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * Sends a number of event messages to an IoT Hub.
+ */
 public class AzureDeviceManager {
 
-    public static void sendMessage(String idDevice, Context c) {
-        sendPostRequest(idDevice, c);
+    private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
+    private static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static String deviceId = "androidapp";
+    private static String connectionString = "HostName=SendersIotHub.azure-devices.net;DeviceId=androidapp;SharedAccessKey=dKistdt6WAe8XWGkaUCJJv+FZhkqwZrbJc/26XgLeK4=";
+    private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+
+
+    protected static class EventCallback implements IotHubEventCallback {
+        public void execute(IotHubStatusCode status, Object context) {
+            Message msg = (Message) context;
+
+            Log.d("IoT Response","IoT Hub responded to message " + msg.getMessageId() + " with status " + status.name());
+
+            if (status == IotHubStatusCode.MESSAGE_EXPIRED) {
+                failedMessageListOnClose.add(msg.getMessageId());
+            }
+        }
     }
 
-    private static void sendPostRequest(String deviceId, final Context c) {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(c);
-        String url = "https://elca-iot.azure-devices.net/devices/" + deviceId + "/messages/events?api-version=2016-02-03)";
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.POST,
-                url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                onPostResponse(response, c, true);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //Log.d("Error", error.getMessage());
-                onPostResponse(error.getMessage(), c, false);
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-                params.put("Authorization", "SharedAccessSignature sr=elca-iot.azure-devices.net&sig=Bi7Tk1nGxGeo%2BZv%2FSzlqnyRfgIOn%2BHGeCJBOPuaracI%3D&se=1525372587&skn=iothubowner");
-                params.put("Cache-Control", "no-cache");
-                return params;
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/x-www-form-urlencoded; charset=UTF-8";
-            }
-
-            @Override
-            public byte[] getBody() {
-                try {
-                    return "On".getBytes("UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    return "".getBytes();
-                }
-
-            }
-
-        };
-
+    public static void sendEvent(String targetDeviceId, String command) {
         try {
-            Log.d("request", stringRequest.getBody().toString());
-        } catch (Exception authFailureError) {
-            authFailureError.printStackTrace();
+            DeviceClient client = new DeviceClient(connectionString, protocol);
+            client.open();
+            DeviceStatus status = new DeviceStatus(deviceId, Calendar.getInstance().getTime().toString(), command, "0", targetDeviceId);
+            String messageString = new Gson().toJson(status);
+            Log.d("json", messageString);
+            Message message = new Message(messageString.getBytes(StandardCharsets.US_ASCII));
+            client.sendEventAsync(message, new EventCallback(), message);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
 
     }
-
-    private static void onPostResponse(String response, Context c, boolean ok) {
-        if (ok) {
-            Log.d("Response", response + "");
-            Toast.makeText(c, "Mensagem enviada!", Toast.LENGTH_LONG).show();
-        } else {
-            Log.d("Response", response + "");
-            Toast.makeText(c, "Erro ao enviar mensagem!", Toast.LENGTH_LONG).show();
-        }
-    }
-
-
 }

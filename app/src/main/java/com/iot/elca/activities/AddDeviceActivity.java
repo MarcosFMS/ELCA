@@ -29,9 +29,9 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.marcos.elca.R;
 import com.iot.elca.dao.ElcaDbHelper;
-import com.iot.elca.dao.MainDeviceDAO;
+import com.iot.elca.dao.PlugDeviceDAO;
 import com.iot.elca.MainActivity;
-import com.iot.elca.model.MainDevice;
+import com.iot.elca.model.PlugDevice;
 
 import java.util.Calendar;
 import java.util.List;
@@ -44,7 +44,7 @@ public class AddDeviceActivity extends AppCompatActivity {
     private boolean isConnected = false;
     private String wifissid;
     private String wifipassword;
-    private MainDevice device;
+    private PlugDevice device;
     private ElcaDbHelper dbHelper;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -155,7 +155,7 @@ public class AddDeviceActivity extends AppCompatActivity {
             String ip = infos[3];
 
             Log.d("info", id+", "+ssid+", "+password+", "+ip);
-            device = new MainDevice(id, true, ssid, password, ip);
+            device = new PlugDevice(id, "on", ssid, password, ip);
         } catch (IndexOutOfBoundsException ex) {
             Toast.makeText(getApplicationContext(), "Código Inválido", Toast.LENGTH_LONG).show();
             returnToDevicesPage();
@@ -242,7 +242,7 @@ public class AddDeviceActivity extends AppCompatActivity {
     public void getRequest() {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url = device.getIp();
+        String url = "http://"+device.getIp();
         url += "?wifidata=" + wifissid + "&" + wifipassword + "|";
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET,
@@ -265,7 +265,7 @@ public class AddDeviceActivity extends AppCompatActivity {
     private void onResponse(String response, boolean ok) {
         if (ok) {
             Log.d("Response", response+"");
-            MainDeviceDAO.insertDevice(dbHelper, device);
+            PlugDeviceDAO.insertDevice(dbHelper, device);
             Toast.makeText(getApplicationContext(), "Dispositivo cadastrado!", Toast.LENGTH_LONG).show();
             returnToDevicesPage();
         } else {
