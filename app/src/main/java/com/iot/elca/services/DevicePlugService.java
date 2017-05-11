@@ -125,11 +125,11 @@ public class DevicePlugService extends Service {
                     //Log.d("time", String.valueOf(time));
                     if (inactive) {
                         sendNotification("Equipamento Inativo", "Equipamento desconectado da rede!");
-                        Log.d("Notification", "Inactive!!");
+                        //Log.d("Notification", "Inactive!!");
                     } else if (time > timeLimit) {
                         sendNotification("Alerta", "Equipamento ligado a muito tempo!");
                         //TODO turnoff device
-                        Log.d("Notification", "Alert!!");
+                        //Log.d("Notification", "Alert!!");
                     }
                 } catch (StorageException e) {
                     e.printStackTrace();

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.iot.elca.Activities.ImageRecognitionActivity">
+    tools:context="com.iot.elca.activities.ImageRecognitionActivity">
 
 
     <Button
@@ -12,6 +12,6 @@
         android:text="Process"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="100px" />
+        android:layout_height="200px" />
 
 </android.support.constraint.ConstraintLayout>

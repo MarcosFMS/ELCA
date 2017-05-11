@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //loadImageRecognitionActivity();
+
         setContentView(R.layout.activity_main);
         defineButtonsActions();
         AzureStorageManager manager = AzureStorageManager.getInstance();
@@ -44,7 +46,12 @@ public class MainActivity extends AppCompatActivity {
         //sendMessageToDevice();
         Intent intent = new Intent(this, DevicePlugService.class);
         //intent.putExtra("deviceId", "elca_main_device");
-        startService(intent);
+        //startService(intent);
+    }
+
+    public void loadImageRecognitionActivity(){
+        Intent intent = new Intent(this.getApplicationContext(), MainActivity.class);
+        startActivity(intent);
     }
 
     private void sendMessageToDevice(String idDevice, String state) {

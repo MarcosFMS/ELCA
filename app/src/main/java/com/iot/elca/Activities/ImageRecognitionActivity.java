@@ -1,4 +1,4 @@
-package com.iot.elca.Activities;
+package com.iot.elca.activities;
 
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,7 +30,8 @@ public class ImageRecognitionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_image_recognition);
+
 
 
         final Bitmap mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ferro1);
@@ -56,6 +58,7 @@ public class ImageRecognitionActivity extends AppCompatActivity {
                     @Override
                     protected void onPostExecute(String s) {
                         mDialog.dismiss();
+
                         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
                     }
 
@@ -81,6 +84,8 @@ public class ImageRecognitionActivity extends AppCompatActivity {
                         }
 
                         String result = gson.toJson(v);
+                        Log.d("test", result);
+                        //Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
                         return result;
                     }
                 };

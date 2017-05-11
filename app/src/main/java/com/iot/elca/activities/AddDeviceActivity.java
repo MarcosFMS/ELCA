@@ -230,7 +230,7 @@ public class AddDeviceActivity extends AppCompatActivity {
             wifissid = edtTxtSsid.getText().toString();
         wifipassword = edtTxtPassword.getText().toString();
         if(wifipassword.replaceAll(" ", "").equals("") || wifissid.replaceAll(" ", "").equals(""))
-            Toast.makeText(getApplicationContext(), "Digite a o ssid e senha do wifi", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Digite o ssid e senha do wifi", Toast.LENGTH_LONG).show();
         else
             sendWIFIData();
     }
@@ -273,5 +273,4 @@ public class AddDeviceActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Erro ao cadastrar dispositivo!", Toast.LENGTH_LONG).show();
         }
     }
-
 }
