@@ -20,6 +20,7 @@ public class ElcaDbHelper extends SQLiteOpenHelper {
 
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(PlugDeviceDAO.CREATE_TABLE);
+        db.execSQL(PirDeviceDAO.CREATE_TABLE);
     }
 
     public static ElcaDbHelper getInstance(Context context){
@@ -33,6 +34,7 @@ public class ElcaDbHelper extends SQLiteOpenHelper {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
         db.execSQL(PlugDeviceDAO.DROP_TABLE);
+        db.execSQL(PirDeviceDAO.DROP_TABLE);
         onCreate(db);
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

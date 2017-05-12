@@ -52,3 +52,6 @@ dependencies {
     // Remote binary dependency
     compile 'com.microsoft.azure.sdk.iot:iot-device-client:1.1.25'
 }
+dependencies {
+    compile 'com.android.support.constraint:constraint-layout:+'
+}

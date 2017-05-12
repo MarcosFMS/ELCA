@@ -28,7 +28,9 @@
         <service
             android:name="com.iot.elca.services.DevicePlugService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name="com.iot.elca.activities.NotificationInfoActivity"></activity>
     </application>
 
 </manifest>

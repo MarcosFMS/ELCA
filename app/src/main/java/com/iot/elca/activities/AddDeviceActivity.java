@@ -5,12 +5,14 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
@@ -28,11 +30,18 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.marcos.elca.R;
+import com.iot.elca.azure.manager.AzureStorageManager;
 import com.iot.elca.dao.ElcaDbHelper;
+import com.iot.elca.dao.PirDeviceDAO;
 import com.iot.elca.dao.PlugDeviceDAO;
 import com.iot.elca.MainActivity;
+import com.iot.elca.model.Device;
+import com.iot.elca.model.PirDevice;
 import com.iot.elca.model.PlugDevice;
+import com.microsoft.azure.storage.StorageException;
 
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.Calendar;
 import java.util.List;
 
@@ -44,7 +53,8 @@ public class AddDeviceActivity extends AppCompatActivity {
     private boolean isConnected = false;
     private String wifissid;
     private String wifipassword;
-    private PlugDevice device;
+    private Device device;
+    private Device.DeviceType dType;
     private ElcaDbHelper dbHelper;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -140,10 +150,49 @@ public class AddDeviceActivity extends AppCompatActivity {
                 String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
                 Log.d("qrcode_return", "Content:" + contents + " Format:" + format);
                 decodeDeviceInfo(contents);
-                connectToDevice();
-                getWifiInfo();
+                checkExistance();
+
             }
         }
+    }
+
+    private void checkExistance(){
+        new AsyncTask<Void, Void, Void>() {
+
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    if (AzureStorageManager.getInstance().exists(device.getId(), dType)) {
+                        connectToDevice();
+                        getWifiInfo();
+                    } else {
+                        if (dType == Device.DeviceType.PIR) {
+                            PirDeviceDAO.insertDevice(dbHelper, new PirDevice(device));
+                        }else if (dType == Device.DeviceType.PLUG) {
+                            PlugDeviceDAO.insertDevice(dbHelper, new PlugDevice(device));
+                        }
+                        Toast.makeText(getApplicationContext(), "Dispositivo cadastrado!", Toast.LENGTH_LONG);
+
+                    }
+
+                } catch (StorageException e) {
+                    e.printStackTrace();
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                } catch (InvalidKeyException e) {
+                    e.printStackTrace();
+                } catch(SQLiteConstraintException ex){
+                    ex.printStackTrace();
+                    //Toast.makeText(getApplicationContext(), "Dsipositivo já cadastrado!", Toast.LENGTH_LONG);
+                } finally {
+                    returnToDevicesPage();
+                }
+
+                return null;
+            }
+        }.execute();
+
     }
 
     public void decodeDeviceInfo(String info) {
@@ -153,9 +202,15 @@ public class AddDeviceActivity extends AppCompatActivity {
             String ssid = infos[1];
             String password = infos[2];
             String ip = infos[3];
+            String type = infos[4];
 
-            Log.d("info", id+", "+ssid+", "+password+", "+ip);
-            device = new PlugDevice(id, "on", ssid, password, ip);
+            if (type.equals("0"))
+                dType = Device.DeviceType.PLUG;
+            else if (type.equals("1"))
+                dType = Device.DeviceType.PIR;
+
+            Log.d("info", id + ", " + ssid + ", " + password + ", " + ip + "," + type);
+            device = new Device(id, "on", ip, ssid, password);
         } catch (IndexOutOfBoundsException ex) {
             Toast.makeText(getApplicationContext(), "Código Inválido", Toast.LENGTH_LONG).show();
             returnToDevicesPage();
@@ -183,12 +238,12 @@ public class AddDeviceActivity extends AppCompatActivity {
         long timeInit = c.getTimeInMillis();
         long timeLimit = timeInit + device_connect_timeout;
 
-        Log.d("loop", timeInit +", "+timeLimit);
+        Log.d("loop", timeInit + ", " + timeLimit);
         while (!checkConnection(getApplicationContext(), device.getSsid()) && timeInit < timeLimit) {
             timeInit = Calendar.getInstance().getTimeInMillis();
         }
         //TODO Retirar
-        Log.d("wifi_data", device.getSsid()+", "+wifiManager.getConnectionInfo().getSSID().replaceAll("\"", "")+" : "+device.getSsid().equals(wifiManager.getConnectionInfo().getSSID().replaceAll("\"", "")));
+        Log.d("wifi_data", device.getSsid() + ", " + wifiManager.getConnectionInfo().getSSID().replaceAll("\"", "") + " : " + device.getSsid().equals(wifiManager.getConnectionInfo().getSSID().replaceAll("\"", "")));
         //
         if (timeInit >= timeLimit) {
             Toast.makeText(getApplicationContext(), "Erro ao conectar com dispositivo!", Toast.LENGTH_LONG).show();
@@ -199,9 +254,9 @@ public class AddDeviceActivity extends AppCompatActivity {
         }
     }
 
-    public void disableNetworks(){
+    public void disableNetworks() {
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-        for( WifiConfiguration i : list ) {
+        for (WifiConfiguration i : list) {
             wifiManager.disableNetwork(i.networkId);
             wifiManager.saveConfiguration();
         }
@@ -229,7 +284,7 @@ public class AddDeviceActivity extends AppCompatActivity {
         if (wifissid == null)
             wifissid = edtTxtSsid.getText().toString();
         wifipassword = edtTxtPassword.getText().toString();
-        if(wifipassword.replaceAll(" ", "").equals("") || wifissid.replaceAll(" ", "").equals(""))
+        if (wifipassword.replaceAll(" ", "").equals("") || wifissid.replaceAll(" ", "").equals(""))
             Toast.makeText(getApplicationContext(), "Digite o ssid e senha do wifi", Toast.LENGTH_LONG).show();
         else
             sendWIFIData();
@@ -242,7 +297,7 @@ public class AddDeviceActivity extends AppCompatActivity {
     public void getRequest() {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url = "http://"+device.getIp();
+        String url = "http://" + device.getIp();
         url += "?wifidata=" + wifissid + "&" + wifipassword + "|";
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET,
@@ -264,12 +319,18 @@ public class AddDeviceActivity extends AppCompatActivity {
 
     private void onResponse(String response, boolean ok) {
         if (ok) {
-            Log.d("Response", response+"");
-            PlugDeviceDAO.insertDevice(dbHelper, device);
-            Toast.makeText(getApplicationContext(), "Dispositivo cadastrado!", Toast.LENGTH_LONG).show();
+            Log.d("Response", response + "");
+            if (dType == Device.DeviceType.PLUG) {
+                PlugDeviceDAO.insertDevice(dbHelper, new PlugDevice(device));
+                Toast.makeText(getApplicationContext(), "Dispositivo cadastrado!", Toast.LENGTH_LONG).show();
+            } else if (dType == Device.DeviceType.PIR) {
+
+                PirDeviceDAO.insertDevice(dbHelper, new PirDevice(device));
+                Toast.makeText(getApplicationContext(), "Dispositivo cadastrado!", Toast.LENGTH_LONG).show();
+            }
             returnToDevicesPage();
         } else {
-            Log.d("Response", response+"");
+            Log.d("Response", response + "");
             Toast.makeText(getApplicationContext(), "Erro ao cadastrar dispositivo!", Toast.LENGTH_LONG).show();
         }
     }

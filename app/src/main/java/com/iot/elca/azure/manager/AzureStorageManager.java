@@ -3,8 +3,9 @@ package com.iot.elca.azure.manager;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.iot.elca.azure.model.DevicePlugDataEntity;
+import com.iot.elca.azure.model.DeviceDataEntity;
 import com.iot.elca.azure.util.Utility;
+import com.iot.elca.model.Device;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.table.CloudTable;
@@ -43,7 +44,7 @@ public class AzureStorageManager{
      * @throws InvalidKeyException
      */
 
-    public Iterable<DevicePlugDataEntity> getDevicePlugData(String deviceId) throws StorageException, URISyntaxException, InvalidKeyException {
+    public Iterable<DeviceDataEntity> getDevicePlugData(String deviceId) throws StorageException, URISyntaxException, InvalidKeyException {
             // Define constants for filters.
 
             // Retrieve storage account from connection-string.
@@ -71,9 +72,9 @@ public class AzureStorageManager{
 
     	    	*/
 
-            TableQuery<DevicePlugDataEntity> partitionQuery =
-                    TableQuery.from(DevicePlugDataEntity.class).where(partitionFilter);
-            Iterable<DevicePlugDataEntity> dataList = cloudTable.execute(partitionQuery);
+            TableQuery<DeviceDataEntity> partitionQuery =
+                    TableQuery.from(DeviceDataEntity.class).where(partitionFilter);
+            Iterable<DeviceDataEntity> dataList = cloudTable.execute(partitionQuery);
             /*
             for (DevicePlugDataEntity entity : dataList) {
                 Log.d("azure-storage",entity.getPartitionKey() +
@@ -81,5 +82,50 @@ public class AzureStorageManager{
                         " " + entity.getState());
             }*/
             return dataList;
+    }
+
+    public boolean exists(String deviceId, Device.DeviceType deviceType) throws StorageException, URISyntaxException, InvalidKeyException{
+        // Define constants for filters.
+
+        // Retrieve storage account from connection-string.
+        CloudStorageAccount storageAccount =
+                CloudStorageAccount.parse(Utility.storageConnectionString);
+
+        // Create the table client.
+        CloudTableClient tableClient = storageAccount.createCloudTableClient();
+        CloudTable cloudTable;
+
+        if(deviceType == Device.DeviceType.PLUG) {
+            // Create a cloud table object for the table.
+            cloudTable = tableClient.getTableReference("devicePlugData");
+        }else{
+            cloudTable = tableClient.getTableReference("devicePirData");
+        }
+
+        // Create a filter condition where the partition key is "Smith".
+
+        String partitionFilter = TableQuery.generateFilterCondition(
+                "PartitionKey",
+                TableQuery.QueryComparisons.EQUAL,
+                deviceId);
+
+      	   /*
+    	    // Specify a partition query, using "Smith" as the partition key filter.
+    	    TableQuery<CustomerEntity> partitionQuery =
+    	        TableQuery.from(CustomerEntity.class)
+    	        .where(partitionFilter);
+
+    	    	*/
+
+        TableQuery<DeviceDataEntity> partitionQuery =
+                TableQuery.from(DeviceDataEntity.class).where(partitionFilter);
+        Iterable<DeviceDataEntity> dataList = cloudTable.execute(partitionQuery);
+            /*
+            for (DevicePlugDataEntity entity : dataList) {
+                Log.d("azure-storage",entity.getPartitionKey() +
+                        " " + entity.getRowKey() +
+                        " " + entity.getState());
+            }*/
+        return dataList.iterator().hasNext();
     }
 }

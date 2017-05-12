@@ -18,10 +18,11 @@ import com.example.marcos.elca.R;
 import com.iot.elca.activities.AddDeviceActivity;
 import com.iot.elca.azure.manager.AzureDeviceManager;
 import com.iot.elca.azure.manager.AzureStorageManager;
-import com.iot.elca.azure.model.DevicePlugDataEntity;
+import com.iot.elca.azure.model.DeviceDataEntity;
 import com.iot.elca.dao.ElcaDbHelper;
 import com.iot.elca.dao.PlugDeviceDAO;
 import com.iot.elca.model.PlugDevice;
+import com.iot.elca.services.DevicePirService;
 import com.iot.elca.services.DevicePlugService;
 import com.iot.elca.view.TurnDeviceImageButton;
 
@@ -44,9 +45,10 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = ElcaDbHelper.getInstance(getApplicationContext());
         loadDeviceList();
         //sendMessageToDevice();
-        Intent intent = new Intent(this, DevicePlugService.class);
-        //intent.putExtra("deviceId", "elca_main_device");
-        //startService(intent);
+        Intent intent = new Intent(this, DevicePirService.class);
+        startService(intent);
+        intent = new Intent(this, DevicePlugService.class);
+        startService(intent);
     }
 
     public void loadImageRecognitionActivity(){
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
             //create the button
             final TurnDeviceImageButton imgBtnTurnDevice = new TurnDeviceImageButton(getApplicationContext(), d);
-            if(d.getState().equals(DevicePlugDataEntity.ON)){
+            if(d.getState().equals(DeviceDataEntity.ON)){
                 imgBtnTurnDevice.setImageResource(R.drawable.turn_on);
             }else {
                 imgBtnTurnDevice.setImageResource(R.drawable.turn_off);
@@ -133,12 +135,12 @@ public class MainActivity extends AppCompatActivity {
     public void turnDevice() {
         PlugDevice device = imgBtnTurnDeviceAux.getDevice();
         //update button
-        if (device.getState().equals(DevicePlugDataEntity.OFF)) {
+        if (device.getState().equals(DeviceDataEntity.OFF)) {
             imgBtnTurnDeviceAux.setImageResource(R.drawable.turn_on);
-            device.setState(DevicePlugDataEntity.ON);
+            device.setState(DeviceDataEntity.ON);
         } else {
             imgBtnTurnDeviceAux.setImageResource(R.drawable.turn_off);
-            device.setState(DevicePlugDataEntity.OFF);
+            device.setState(DeviceDataEntity.OFF);
         }
 
         Log.d("State", String.valueOf(device.getState()));

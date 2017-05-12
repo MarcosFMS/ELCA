@@ -15,30 +15,26 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.marcos.elca.R;
-import com.iot.elca.MainActivity;
 import com.iot.elca.activities.NotificationInfoActivity;
 import com.iot.elca.azure.manager.AzureStorageManager;
 import com.iot.elca.azure.model.DeviceDataEntity;
 import com.iot.elca.dao.ElcaDbHelper;
-import com.iot.elca.dao.PlugDeviceDAO;
-import com.iot.elca.model.PlugDevice;
+import com.iot.elca.dao.PirDeviceDAO;
+import com.iot.elca.model.PirDevice;
 import com.microsoft.azure.storage.StorageException;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-public class DevicePlugService extends Service {
+public class DevicePirService extends Service {
 
-    public DevicePlugService() {
+    public DevicePirService() {
     }
 
     @Override
@@ -52,7 +48,7 @@ public class DevicePlugService extends Service {
     private ElcaDbHelper dbHelper;
     private AzureStorageManager stManager;
     private long timeLimit = 2L;//time in minutes
-    private List<PlugDevice> plugDevices;
+    private List<PirDevice> plugDevices;
     private long timeLimitInactive = 5L;//time in minutes
 
     // Handler that receives messages from the thread
@@ -62,18 +58,18 @@ public class DevicePlugService extends Service {
         }
 
         private class Monitor implements Runnable {
-            private PlugDevice device;
+            private PirDevice device;
             private boolean inactive = false;
 
-            public PlugDevice getDevice() {
+            public PirDevice getDevice() {
                 return device;
             }
 
-            public void setDevice(PlugDevice device) {
+            public void setDevice(PirDevice device) {
                 this.device = device;
             }
 
-            public Monitor(PlugDevice device) {
+            public Monitor(PirDevice device) {
                 super();
                 setDevice(device);
             }
@@ -133,8 +129,10 @@ public class DevicePlugService extends Service {
                         Log.d("Notification", "Inactive!!");
                     } else if (time > timeLimit) {
                         String date = dateFormat.format(Calendar.getInstance().getTime());
-                        String intentMessage = "O dispositivo está ligado a mais tempo que o normal e foi desligado às " + date;
-                        sendNotification("Alerta", "Dispositivo ligado a muito tempo!", intentMessage);
+                        String intentMessage =  "Foi detectada um tempo de permanência anormal em um cômodo da casa às "+date;
+                        sendNotification("Alerta", "A pessoa está no local a muito tempo!", intentMessage);
+                        //TODO turnoff device
+                        Log.d("Notification", "Alert!!");
                     }
                 } catch (StorageException e) {
                     e.printStackTrace();
@@ -164,7 +162,7 @@ public class DevicePlugService extends Service {
                                 PendingIntent.FLAG_UPDATE_CURRENT
                         );
 
-                resultIntent.putExtra("type",0);
+                resultIntent.putExtra("type",1);
                 resultIntent.putExtra("deviceId",device.getId());
                 resultIntent.putExtra("message", intentMessage);
 
@@ -190,7 +188,7 @@ public class DevicePlugService extends Service {
         public void handleMessage(Message msg) {
             Monitor monitor;
             Thread thread;
-            for (PlugDevice d : plugDevices) {
+            for (PirDevice d : plugDevices) {
                 monitor = new Monitor(d);
                 thread = new Thread(monitor);
                 thread.start();
@@ -239,10 +237,9 @@ public class DevicePlugService extends Service {
         Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
 
-
     private void getPlugDevices() {
-        plugDevices = PlugDeviceDAO.selectAllDevices(dbHelper);
+        plugDevices = PirDeviceDAO.selectAllDevices(dbHelper);
     }
 
-
 }
+
